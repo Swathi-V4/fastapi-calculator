@@ -1,11 +1,16 @@
-from fastapi import FastAPI, HTTPException, Request
+import logging
+
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, field_validator
-from fastapi.exceptions import RequestValidationError
-from app.operations import add, subtract, multiply, divide
-import uvicorn
-import logging
+from sqlalchemy.orm import Session
+
+from app import crud, schemas
+from app.database import Base, engine, get_db
+from app.operations import add, divide, multiply, subtract
 
 
 # Setup logging
@@ -16,23 +21,28 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+
 # Setup templates directory
 templates = Jinja2Templates(directory="templates")
 
 
-# Pydantic model for request data
+# Pydantic model for calculator request data
 class OperationRequest(BaseModel):
     a: float = Field(..., description="The first number")
     b: float = Field(..., description="The second number")
 
     @field_validator("a", "b")
+    @classmethod
     def validate_numbers(cls, value):
         if not isinstance(value, (int, float)):
             raise ValueError("Both a and b must be numbers.")
         return value
 
 
-# Pydantic model for successful response
+# Pydantic model for successful calculator response
 class OperationResponse(BaseModel):
     result: float = Field(..., description="The result of the operation")
 
@@ -42,10 +52,15 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error message")
 
 
-# Custom Exception Handlers
+# Custom exception handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
-    logger.error(f"HTTPException on {request.url.path}: {exc.detail}")
+    logger.error(
+        "HTTPException on %s: %s",
+        request.url.path,
+        exc.detail,
+    )
+
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": exc.detail},
@@ -58,11 +73,14 @@ async def validation_exception_handler(
     exc: RequestValidationError,
 ):
     error_messages = "; ".join(
-        [f"{err['loc'][-1]}: {err['msg']}" for err in exc.errors()]
+        f"{error['loc'][-1]}: {error['msg']}"
+        for error in exc.errors()
     )
 
     logger.error(
-        f"ValidationError on {request.url.path}: {error_messages}"
+        "ValidationError on %s: %s",
+        request.url.path,
+        error_messages,
     )
 
     return JSONResponse(
@@ -74,14 +92,49 @@ async def validation_exception_handler(
 @app.get("/")
 async def read_root(request: Request):
     """
-    Serve the index.html template.
+    Serve the calculator homepage.
     """
     logger.info("Calculator homepage accessed")
 
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request},
+        request=request,
+        name="index.html",
     )
+
+
+@app.post(
+    "/users/",
+    response_model=schemas.UserRead,
+    status_code=201,
+    responses={400: {"model": ErrorResponse}},
+)
+def create_user(
+    user: schemas.UserCreate,
+    db: Session = Depends(get_db),
+):
+    """
+    Create a user while hashing the password before storage.
+    """
+    try:
+        db_user = crud.create_user(db, user)
+
+        logger.info(
+            "User created successfully: %s",
+            db_user.username,
+        )
+
+        return db_user
+
+    except ValueError as exc:
+        logger.warning(
+            "User creation failed: %s",
+            str(exc),
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
 
 
 @app.post(
@@ -95,26 +148,24 @@ async def add_route(operation: OperationRequest):
     """
     try:
         logger.info(
-            f"Adding {operation.a} and {operation.b}"
+            "Adding %s and %s",
+            operation.a,
+            operation.b,
         )
 
         result = add(operation.a, operation.b)
 
-        logger.info(
-            f"Addition result: {result}"
-        )
+        logger.info("Addition result: %s", result)
 
         return OperationResponse(result=result)
 
-    except Exception as e:
-        logger.error(
-            f"Add Operation Error: {str(e)}"
-        )
+    except Exception as exc:
+        logger.error("Add Operation Error: %s", str(exc))
 
         raise HTTPException(
             status_code=400,
-            detail=str(e),
-        )
+            detail=str(exc),
+        ) from exc
 
 
 @app.post(
@@ -128,26 +179,24 @@ async def subtract_route(operation: OperationRequest):
     """
     try:
         logger.info(
-            f"Subtracting {operation.b} from {operation.a}"
+            "Subtracting %s from %s",
+            operation.b,
+            operation.a,
         )
 
         result = subtract(operation.a, operation.b)
 
-        logger.info(
-            f"Subtraction result: {result}"
-        )
+        logger.info("Subtraction result: %s", result)
 
         return OperationResponse(result=result)
 
-    except Exception as e:
-        logger.error(
-            f"Subtract Operation Error: {str(e)}"
-        )
+    except Exception as exc:
+        logger.error("Subtract Operation Error: %s", str(exc))
 
         raise HTTPException(
             status_code=400,
-            detail=str(e),
-        )
+            detail=str(exc),
+        ) from exc
 
 
 @app.post(
@@ -161,26 +210,24 @@ async def multiply_route(operation: OperationRequest):
     """
     try:
         logger.info(
-            f"Multiplying {operation.a} and {operation.b}"
+            "Multiplying %s and %s",
+            operation.a,
+            operation.b,
         )
 
         result = multiply(operation.a, operation.b)
 
-        logger.info(
-            f"Multiplication result: {result}"
-        )
+        logger.info("Multiplication result: %s", result)
 
         return OperationResponse(result=result)
 
-    except Exception as e:
-        logger.error(
-            f"Multiply Operation Error: {str(e)}"
-        )
+    except Exception as exc:
+        logger.error("Multiply Operation Error: %s", str(exc))
 
         raise HTTPException(
             status_code=400,
-            detail=str(e),
-        )
+            detail=str(exc),
+        ) from exc
 
 
 @app.post(
@@ -194,36 +241,35 @@ async def divide_route(operation: OperationRequest):
     """
     try:
         logger.info(
-            f"Dividing {operation.a} by {operation.b}"
+            "Dividing %s by %s",
+            operation.a,
+            operation.b,
         )
 
         result = divide(operation.a, operation.b)
 
-        logger.info(
-            f"Division result: {result}"
-        )
+        logger.info("Division result: %s", result)
 
         return OperationResponse(result=result)
 
-    except ValueError as e:
-        logger.error(
-            f"Divide Operation Error: {str(e)}"
-        )
+    except ValueError as exc:
+        logger.error("Divide Operation Error: %s", str(exc))
 
         raise HTTPException(
             status_code=400,
-            detail=str(e),
-        )
+            detail=str(exc),
+        ) from exc
 
-    except Exception as e:
+    except Exception as exc:
         logger.error(
-            f"Divide Operation Internal Error: {str(e)}"
+            "Divide Operation Internal Error: %s",
+            str(exc),
         )
 
         raise HTTPException(
             status_code=500,
             detail="Internal Server Error",
-        )
+        ) from exc
 
 
 if __name__ == "__main__":
