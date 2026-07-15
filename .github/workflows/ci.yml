@@ -27,9 +27,11 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastapi_db
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastapi_db
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,6 +44,10 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps chromium
 
+      - name: Create database tables
+        run: |
+          python -c "from app.database import Base, engine; import app.models; Base.metadata.create_all(bind=engine)"
+
       - name: Run tests
         run: pytest -v
 
@@ -50,16 +56,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: docker build -t swathi638/fastapi-calculator:latest .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: swathi638/fastapi-calculator:latest
 
       - name: Scan Docker image
         uses: aquasecurity/trivy-action@master
