@@ -28,6 +28,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastapi_db
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fastapi_db
+      SECRET_KEY: github-actions-test-secret-key
 
     steps:
       - name: Check out repository
@@ -41,11 +42,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
       - name: Install Playwright browser
         run: |
-          python -m playwright install chromium
+          python -m playwright install --with-deps chromium
 
       - name: Create database tables
         run: |
@@ -55,9 +56,32 @@ jobs:
         run: |
           pytest tests/unit tests/integration --cov=app -v
 
+      - name: Start FastAPI server
+        run: |
+          uvicorn main:app --host 127.0.0.1 --port 8000 > server.log 2>&1 &
+          echo $! > server.pid
+
+          for i in {1..30}; do
+            if curl --fail http://127.0.0.1:8000/register-page; then
+              echo "FastAPI server is ready"
+              exit 0
+            fi
+
+            sleep 1
+          done
+
+          echo "FastAPI server failed to start"
+          cat server.log
+          exit 1
+
       - name: Run Playwright E2E tests
         run: |
           pytest tests/test_auth_e2e.py --no-cov -v
+
+      - name: Show server log on failure
+        if: failure()
+        run: |
+          cat server.log || true
 
   docker:
     needs: test
