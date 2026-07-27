@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Create Account</h1>
+
+        <form id="register-form">
+            <label for="username">Username</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                minlength="3"
+                required
+            >
+
+            <label for="email">Email</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                minlength="8"
+                required
+            >
+
+            <label for="confirm-password">Confirm Password</label>
+            <input
+                id="confirm-password"
+                name="confirm-password"
+                type="password"
+                minlength="8"
+                required
+            >
+
+            <button type="submit">Register</button>
+        </form>
+
+        <div id="message"></div>
+
+        <a href="/login-page">Already registered? Log in</a>
+    </div>
+
+    <script>
+        const form = document.getElementById("register-form");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+                document.getElementById("confirm-password").value;
+
+            message.textContent = "";
+
+            if (password.length < 8) {
+                message.textContent =
+                    "Password must be at least 8 characters.";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                message.textContent = "Passwords do not match.";
+                return;
+            }
+
+            try {
+                const response = await fetch("/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    message.textContent = "Registration successful!";
+                    form.reset();
+                } else {
+                    message.textContent =
+                        data.error || data.detail || "Registration failed.";
+                }
+            } catch (error) {
+                message.textContent =
+                    "Unable to connect to the server.";
+            }
+        });
+    </script>
+</body>
+</html>

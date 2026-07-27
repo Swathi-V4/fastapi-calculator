@@ -43,12 +43,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Playwright browser
+        run: |
+          python -m playwright install chromium
+
       - name: Create database tables
         run: |
           python -c "from app.database import Base, engine; import app.models; Base.metadata.create_all(bind=engine)"
 
       - name: Run unit and integration tests
-        run: pytest tests/unit tests/integration --cov=app -v
+        run: |
+          pytest tests/unit tests/integration --cov=app -v
+
+      - name: Run Playwright E2E tests
+        run: |
+          pytest tests/test_auth_e2e.py --no-cov -v
 
   docker:
     needs: test
