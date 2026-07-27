@@ -42,14 +42,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          playwright install --with-deps chromium
 
       - name: Create database tables
         run: |
           python -c "from app.database import Base, engine; import app.models; Base.metadata.create_all(bind=engine)"
 
-      - name: Run tests
-        run: pytest -v
+      - name: Run unit and integration tests
+        run: pytest tests/unit tests/integration --cov=app -v
 
   docker:
     needs: test
