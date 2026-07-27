@@ -51,7 +51,7 @@ def clean_test_users():
 
 def test_create_user_in_postgres(unique_user_data):
     response = client.post(
-        "/users/",
+        "/register",
         json=unique_user_data,
     )
 
@@ -69,7 +69,7 @@ def test_create_user_in_postgres(unique_user_data):
 
 def test_password_is_hashed_in_database(unique_user_data):
     response = client.post(
-        "/users/",
+        "/register",
         json=unique_user_data,
     )
 
@@ -96,7 +96,7 @@ def test_password_is_hashed_in_database(unique_user_data):
 
 def test_duplicate_username_is_rejected(unique_user_data):
     first_response = client.post(
-        "/users/",
+        "/register",
         json=unique_user_data,
     )
 
@@ -109,7 +109,7 @@ def test_duplicate_username_is_rejected(unique_user_data):
     }
 
     second_response = client.post(
-        "/users/",
+        "/register",
         json=duplicate_data,
     )
 
@@ -119,7 +119,7 @@ def test_duplicate_username_is_rejected(unique_user_data):
 
 def test_duplicate_email_is_rejected(unique_user_data):
     first_response = client.post(
-        "/users/",
+        "/register",
         json=unique_user_data,
     )
 
@@ -132,7 +132,7 @@ def test_duplicate_email_is_rejected(unique_user_data):
     }
 
     second_response = client.post(
-        "/users/",
+        "/register",
         json=duplicate_data,
     )
 
@@ -142,7 +142,7 @@ def test_duplicate_email_is_rejected(unique_user_data):
 
 def test_invalid_email_is_rejected():
     response = client.post(
-        "/users/",
+        "/register",
         json={
             "username": f"user_{uuid4().hex[:8]}",
             "email": "not-an-email",
