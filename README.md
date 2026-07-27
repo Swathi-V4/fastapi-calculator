@@ -1,6 +1,6 @@
 # FastAPI Calculator
 
-A FastAPI application that supports secure user registration/login and CRUD operations for calculations using PostgreSQL, SQLAlchemy, and Pydantic.
+A FastAPI application that supports secure user registration and login using JWT authentication, along with CRUD operations for calculations using PostgreSQL, SQLAlchemy, and Pydantic.
 
 ## Running the Application
 
@@ -47,9 +47,16 @@ The application will be available at:
 - OpenAPI Documentation: http://localhost:8000/docs
 - ReDoc Documentation: http://localhost:8000/redoc
 
+## Front-End Pages
+
+After the application is running, open your browser and visit:
+
+- Registration Page: http://localhost:8000/register-page
+- Login Page: http://localhost:8000/login-page
+
 ---
 
-# Running Tests Locally
+## Running Tests Locally
 
 Run all unit and integration tests:
 
@@ -75,9 +82,23 @@ Run only integration tests:
 pytest tests/integration -v
 ```
 
+## Running Playwright E2E Tests
+
+Install the Playwright browser:
+
+```bash
+python -m playwright install chromium
+```
+
+Run the Playwright end-to-end tests:
+
+```bash
+pytest tests/test_auth_e2e.py -v --no-cov
+```
+
 ---
 
-# Manual Testing
+## Manual Testing
 
 Open the OpenAPI documentation at:
 
@@ -95,8 +116,13 @@ Verify the following endpoints:
 - Edit Calculation
 - Delete Calculation
 
+You can also verify the front-end pages:
+
+- http://localhost:8000/register-page
+- http://localhost:8000/login-page
+
 ---
 
-# Docker Hub Repository
+## Docker Hub Repository
 
 https://hub.docker.com/r/swathi638/fastapi-calculator
