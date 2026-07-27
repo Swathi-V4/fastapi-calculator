@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app import crud, schemas
 from app.database import Base, engine, get_db
 from app.operations import add, divide, multiply, subtract
+from app.routers import calculations, users
 
 
 # Setup logging
@@ -18,7 +19,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-app = FastAPI()
+# Create FastAPI application
+app = FastAPI(
+    title="FastAPI Calculator",
+    description="Calculator API with user authentication and calculation CRUD routes",
+    version="1.0.0",
+)
+
+
+# Include routers
+app.include_router(users.router)
+app.include_router(calculations.router)
 
 
 # Create database tables
@@ -39,6 +50,7 @@ class OperationRequest(BaseModel):
     def validate_numbers(cls, value):
         if not isinstance(value, (int, float)):
             raise ValueError("Both a and b must be numbers.")
+
         return value
 
 
@@ -52,9 +64,12 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error message")
 
 
-# Custom exception handlers
+# Custom HTTP exception handler
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(
+    request: Request,
+    exc: HTTPException,
+):
     logger.error(
         "HTTPException on %s: %s",
         request.url.path,
@@ -67,6 +82,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     )
 
 
+# Custom validation exception handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
     request: Request,
@@ -107,13 +123,17 @@ async def read_root(request: Request):
     response_model=schemas.UserRead,
     status_code=201,
     responses={400: {"model": ErrorResponse}},
+    tags=["Legacy Users"],
 )
 def create_user(
     user: schemas.UserCreate,
     db: Session = Depends(get_db),
 ):
     """
-    Create a user while hashing the password before storage.
+    Create a user using the original user endpoint.
+
+    The assignment-specific registration endpoint will be:
+    POST /users/register
     """
     try:
         db_user = crud.create_user(db, user)
@@ -141,6 +161,7 @@ def create_user(
     "/add",
     response_model=OperationResponse,
     responses={400: {"model": ErrorResponse}},
+    tags=["Calculator"],
 )
 async def add_route(operation: OperationRequest):
     """
@@ -160,7 +181,10 @@ async def add_route(operation: OperationRequest):
         return OperationResponse(result=result)
 
     except Exception as exc:
-        logger.error("Add Operation Error: %s", str(exc))
+        logger.error(
+            "Add Operation Error: %s",
+            str(exc),
+        )
 
         raise HTTPException(
             status_code=400,
@@ -172,6 +196,7 @@ async def add_route(operation: OperationRequest):
     "/subtract",
     response_model=OperationResponse,
     responses={400: {"model": ErrorResponse}},
+    tags=["Calculator"],
 )
 async def subtract_route(operation: OperationRequest):
     """
@@ -186,12 +211,18 @@ async def subtract_route(operation: OperationRequest):
 
         result = subtract(operation.a, operation.b)
 
-        logger.info("Subtraction result: %s", result)
+        logger.info(
+            "Subtraction result: %s",
+            result,
+        )
 
         return OperationResponse(result=result)
 
     except Exception as exc:
-        logger.error("Subtract Operation Error: %s", str(exc))
+        logger.error(
+            "Subtract Operation Error: %s",
+            str(exc),
+        )
 
         raise HTTPException(
             status_code=400,
@@ -203,6 +234,7 @@ async def subtract_route(operation: OperationRequest):
     "/multiply",
     response_model=OperationResponse,
     responses={400: {"model": ErrorResponse}},
+    tags=["Calculator"],
 )
 async def multiply_route(operation: OperationRequest):
     """
@@ -217,12 +249,18 @@ async def multiply_route(operation: OperationRequest):
 
         result = multiply(operation.a, operation.b)
 
-        logger.info("Multiplication result: %s", result)
+        logger.info(
+            "Multiplication result: %s",
+            result,
+        )
 
         return OperationResponse(result=result)
 
     except Exception as exc:
-        logger.error("Multiply Operation Error: %s", str(exc))
+        logger.error(
+            "Multiply Operation Error: %s",
+            str(exc),
+        )
 
         raise HTTPException(
             status_code=400,
@@ -234,6 +272,7 @@ async def multiply_route(operation: OperationRequest):
     "/divide",
     response_model=OperationResponse,
     responses={400: {"model": ErrorResponse}},
+    tags=["Calculator"],
 )
 async def divide_route(operation: OperationRequest):
     """
@@ -246,14 +285,23 @@ async def divide_route(operation: OperationRequest):
             operation.b,
         )
 
-        result = divide(operation.a, operation.b)
+        result = divide(
+            operation.a,
+            operation.b,
+        )
 
-        logger.info("Division result: %s", result)
+        logger.info(
+            "Division result: %s",
+            result,
+        )
 
         return OperationResponse(result=result)
 
     except ValueError as exc:
-        logger.error("Divide Operation Error: %s", str(exc))
+        logger.error(
+            "Divide Operation Error: %s",
+            str(exc),
+        )
 
         raise HTTPException(
             status_code=400,
@@ -274,7 +322,8 @@ async def divide_route(operation: OperationRequest):
 
 if __name__ == "__main__":
     uvicorn.run(
-        app,
+        "main:app",
         host="127.0.0.1",
         port=8000,
+        reload=True,
     )

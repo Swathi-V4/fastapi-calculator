@@ -1,12 +1,23 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, EmailStr, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    model_validator,
+)
 
 
 class UserCreate(BaseModel):
-    username: str
+    username: str = Field(min_length=3, max_length=50)
     email: EmailStr
+    password: str = Field(min_length=8)
+
+
+class UserLogin(BaseModel):
+    username: str
     password: str
 
 
@@ -27,6 +38,19 @@ class CalculationType(str, Enum):
 
 
 class CalculationCreate(BaseModel):
+    a: float
+    b: float
+    type: CalculationType
+
+    @model_validator(mode="after")
+    def validate_division(self):
+        if self.type == CalculationType.DIVIDE and self.b == 0:
+            raise ValueError("Division by zero is not allowed")
+
+        return self
+
+
+class CalculationUpdate(BaseModel):
     a: float
     b: float
     type: CalculationType

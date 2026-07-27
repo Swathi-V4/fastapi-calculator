@@ -1,4 +1,8 @@
-# Running Tests Locally
+# FastAPI Calculator
+
+A FastAPI application that supports secure user registration/login and CRUD operations for calculations using PostgreSQL, SQLAlchemy, and Pydantic.
+
+## Running the Application
 
 Clone the repository:
 
@@ -13,13 +17,13 @@ Create and activate a virtual environment:
 python -m venv venv
 ```
 
-Mac/Linux:
+### Mac/Linux
 
 ```bash
 source venv/bin/activate
 ```
 
-Windows:
+### Windows
 
 ```bash
 venv\Scripts\activate
@@ -31,10 +35,32 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run all tests:
+Start the application with Docker:
 
 ```bash
-pytest -v
+docker compose up --build
+```
+
+The application will be available at:
+
+- Application: http://localhost:8000
+- OpenAPI Documentation: http://localhost:8000/docs
+- ReDoc Documentation: http://localhost:8000/redoc
+
+---
+
+# Running Tests Locally
+
+Run all unit and integration tests:
+
+```bash
+pytest tests/unit tests/integration -v
+```
+
+Run tests with coverage:
+
+```bash
+pytest tests/unit tests/integration --cov=app
 ```
 
 Run only unit tests:
@@ -49,14 +75,28 @@ Run only integration tests:
 pytest tests/integration -v
 ```
 
-Run only end-to-end tests:
+---
 
-```bash
-pytest tests/e2e -v
+# Manual Testing
+
+Open the OpenAPI documentation at:
+
+```
+http://localhost:8000/docs
 ```
 
-# Docker Hub Repository
+Verify the following endpoints:
 
-Docker image:
+- Register User
+- Login User
+- Browse Calculations
+- Add Calculation
+- Read Calculation
+- Edit Calculation
+- Delete Calculation
+
+---
+
+# Docker Hub Repository
 
 https://hub.docker.com/r/swathi638/fastapi-calculator
