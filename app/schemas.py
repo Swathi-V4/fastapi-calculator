@@ -10,6 +10,10 @@ from pydantic import (
 )
 
 
+# -------------------------
+# User schemas
+# -------------------------
+
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     email: EmailStr
@@ -35,6 +39,10 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+# -------------------------
+# Calculation schemas
+# -------------------------
+
 class CalculationType(str, Enum):
     ADD = "Add"
     SUBTRACT = "Sub"
@@ -43,8 +51,8 @@ class CalculationType(str, Enum):
 
 
 class CalculationCreate(BaseModel):
-    a: float
-    b: float
+    a: float = Field(allow_inf_nan=False)
+    b: float = Field(allow_inf_nan=False)
     type: CalculationType
 
     @model_validator(mode="after")
@@ -56,8 +64,8 @@ class CalculationCreate(BaseModel):
 
 
 class CalculationUpdate(BaseModel):
-    a: float
-    b: float
+    a: float = Field(allow_inf_nan=False)
+    b: float = Field(allow_inf_nan=False)
     type: CalculationType
 
     @model_validator(mode="after")
@@ -74,6 +82,7 @@ class CalculationRead(BaseModel):
     b: float
     type: CalculationType
     result: float
+    user_id: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

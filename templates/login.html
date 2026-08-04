@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>Login</title>
 
     <style>
@@ -26,11 +29,13 @@
 
         h1 {
             text-align: center;
+            margin-top: 0;
         }
 
         label {
             display: block;
             margin-top: 15px;
+            font-weight: bold;
         }
 
         input {
@@ -38,6 +43,8 @@
             padding: 10px;
             margin-top: 5px;
             box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
         }
 
         button {
@@ -51,15 +58,34 @@
             cursor: pointer;
         }
 
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
         #message {
             margin-top: 15px;
             text-align: center;
+            min-height: 20px;
+        }
+
+        .success {
+            color: #15803d;
+        }
+
+        .error {
+            color: #b91c1c;
         }
 
         a {
             display: block;
             text-align: center;
             margin-top: 15px;
+            color: #2563eb;
         }
     </style>
 </head>
@@ -74,6 +100,7 @@
                 id="email"
                 name="email"
                 type="email"
+                placeholder="Enter your email"
                 required
             >
 
@@ -82,14 +109,17 @@
                 id="password"
                 name="password"
                 type="password"
+                placeholder="Enter your password"
                 minlength="8"
                 required
             >
 
-            <button type="submit">Login</button>
+            <button id="login-button" type="submit">
+                Login
+            </button>
         </form>
 
-        <div id="message"></div>
+        <div id="message" role="alert"></div>
 
         <a href="/register-page">Create an account</a>
     </div>
@@ -97,14 +127,50 @@
     <script>
         const form = document.getElementById("login-form");
         const message = document.getElementById("message");
+        const loginButton = document.getElementById("login-button");
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = type;
+        }
 
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value;
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
 
-            message.textContent = "";
+            const password = document
+                .getElementById("password")
+                .value;
+
+            showMessage("", "");
+            
+            if (!email) {
+                showMessage("Please enter your email.", "error");
+                return;
+            }
+
+            if (!email.includes("@")) {
+                showMessage(
+                    "Please enter a valid email address.",
+                    "error"
+                );
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage(
+                    "Password must be at least 8 characters.",
+                    "error"
+                );
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.textContent = "Logging in...";
 
             try {
                 const response = await fetch("/login", {
@@ -126,17 +192,32 @@
                         data.access_token
                     );
 
-                    message.textContent = "Login successful!";
+                    showMessage(
+                        "Login successful!",
+                        "success"
+                    );
+
                     form.reset();
+
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 700);
                 } else {
-                    message.textContent =
+                    showMessage(
                         data.error ||
                         data.detail ||
-                        "Invalid email or password.";
+                        "Invalid email or password.",
+                        "error"
+                    );
                 }
             } catch (error) {
-                message.textContent =
-                    "Unable to connect to the server.";
+                showMessage(
+                    "Unable to connect to the server.",
+                    "error"
+                );
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = "Login";
             }
         });
     </script>

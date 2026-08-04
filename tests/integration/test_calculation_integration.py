@@ -1,9 +1,20 @@
-from app.models import Calculation
+from app.models import Calculation, User
 from app.schemas import CalculationCreate
+from app.security import hash_password
 from app.services.calculation_factory import CalculationFactory
 
 
 def test_insert_calculation_record(db_session):
+    user = User(
+        username="integrationuser",
+        email="integrationuser@test.com",
+        password_hash=hash_password("Password123!"),
+    )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
     calculation_data = CalculationCreate(
         a=20,
         b=4,
@@ -21,6 +32,7 @@ def test_insert_calculation_record(db_session):
         b=calculation_data.b,
         type=calculation_data.type.value,
         result=result,
+        user_id=user.id,
     )
 
     db_session.add(calculation)
@@ -29,7 +41,10 @@ def test_insert_calculation_record(db_session):
 
     saved_calculation = (
         db_session.query(Calculation)
-        .filter(Calculation.id == calculation.id)
+        .filter(
+            Calculation.id == calculation.id,
+            Calculation.user_id == user.id,
+        )
         .first()
     )
 
@@ -38,3 +53,4 @@ def test_insert_calculation_record(db_session):
     assert saved_calculation.b == 4
     assert saved_calculation.type == "Divide"
     assert saved_calculation.result == 5
+    assert saved_calculation.user_id == user.id

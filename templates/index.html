@@ -1,318 +1,689 @@
 <!DOCTYPE html>
-<!--
-    Document Type Declaration (DOCTYPE)
-    
-    The <!DOCTYPE html> declaration defines the document type and version of HTML.
-    It ensures that the browser interprets the document as an HTML5 document.
-    This declaration is mandatory and should be the very first line in your HTML document.
--->
-
 <html lang="en">
-<!--
-    <html> Tag
-    
-    The <html> element is the root element of an HTML page. It encapsulates all other elements
-    within the document. The lang="en" attribute specifies that the language of the document is English,
-    which aids in accessibility and SEO (Search Engine Optimization).
--->
 <head>
-    <!--
-        <head> Section
-        
-        The <head> element contains meta-information about the HTML document, such as its title,
-        character set, linked resources like CSS and JavaScript files, and other metadata.
-        This information is not displayed directly on the web page.
-    -->
-    
     <meta charset="UTF-8">
-    <!--
-        <meta> Tag: Character Set
-        
-        The <meta charset="UTF-8"> tag specifies the character encoding for the HTML document.
-        UTF-8 is a widely used encoding that supports virtually all characters from all languages,
-        ensuring that text is rendered correctly.
-    -->
-    
-    <title>Hello World & Calculator Demo</title>
-    <!--
-        <title> Tag
-        
-        The <title> element defines the title of the HTML document, which appears in the browser's
-        title bar or tab. It is also used by search engines to understand the content of the page.
-    -->
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation Manager</title>
+
     <style>
-        /*
-            <style> Section: CSS Styles
-            
-            The <style> element allows you to embed CSS (Cascading Style Sheets) directly within
-            the HTML document. CSS is used to style and layout web pages, controlling aspects
-            like colors, fonts, spacing, and positioning.
-        */
-        
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            /* 
-                Styles for the <body> Element
-                
-                - font-family: Sets the font for the entire page to Arial, sans-serif.
-                - text-align: Centers the text horizontally.
-                - margin-top: Adds a 50-pixel margin at the top of the page for spacing.
-            */
+            margin: 0;
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            background: #f4f4f4;
+            color: #1f2937;
         }
-        
-        .calculator {
-            /* 
-                Styles for Elements with the "calculator" Class
-                
-                - margin-top: Adds a 30-pixel margin above the calculator section to separate it
-                  from other content.
-            */
-            margin-top: 30px;
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
         }
-        
-        input {
-            /* 
-                Styles for <input> Elements
-                
-                - margin: Adds a 5-pixel margin around input fields for spacing.
-                - padding: Adds a 5-pixel padding inside input fields for better readability.
-            */
-            margin: 5px;
-            padding: 5px;
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
         }
-        
-        button {
-            /* 
-                Styles for <button> Elements
-                
-                - padding: Adds 5 pixels of vertical padding and 10 pixels of horizontal padding
-                  inside buttons to make them larger and more clickable.
-            */
-            padding: 5px 10px;
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
         }
-        
-        .result {
-            /* 
-                Styles for Elements with the "result" Class
-                
-                - margin-top: Adds a 10-pixel margin above the result display area.
-                - font-weight: Makes the text bold to emphasize the result.
-            */
-            margin-top: 10px;
+
+        button,
+        .link-button {
+            border: none;
+            border-radius: 5px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .success {
+            background: #15803d;
+            color: white;
+        }
+
+        .light {
+            background: white;
+            color: #2563eb;
+        }
+
+        main {
+            width: min(1100px, 94%);
+            margin: 28px auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
             font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .form-actions {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #message {
+            min-height: 22px;
+            margin: 14px 0 0;
+            font-weight: bold;
+        }
+
+        .message-success {
+            color: #15803d;
+        }
+
+        .message-error {
+            color: #b91c1c;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f8fafc;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .row-actions button {
+            padding: 7px 10px;
+        }
+
+        .empty {
+            padding: 18px 0;
+            color: #6b7280;
+        }
+
+        .details {
+            display: none;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 18px;
+        }
+
+        .details p {
+            margin: 7px 0;
+        }
+
+        @media (max-width: 760px) {
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .row-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
+
 <body>
-    <!--
-        <body> Section
-        
-        The <body> element contains all the contents of an HTML document, such as text, images,
-        links, buttons, and other media. Everything within the <body> tag is rendered on the
-        web page and visible to users.
-    -->
-    
-    <h1>Hello World</h1>
-    <!--
-        <h1> Tag: Heading
-        
-        The <h1> element represents the most important heading on the page. It is typically used
-        for the main title or headline. Search engines give significant weight to <h1> tags for SEO.
-    -->
-    
-    <div class="calculator">
-        <!--
-            <div> Element with "calculator" Class
-            
-            The <div> element is a generic container used to group other elements. The class="calculator"
-            attribute assigns the "calculator" class to this <div>, allowing it to be styled using CSS.
-            This section contains the calculator interface, including input fields and buttons.
-        -->
-        
-        <h2>Calculator</h2>
-        <!--
-            <h2> Tag: Subheading
-            
-            The <h2> element represents a secondary heading, subordinate to <h1>. It introduces the
-            calculator section of the page.
-        -->
-        
-        <input type="number" id="a" placeholder="First number">
-        <!--
-            <input> Element: First Number Input
-            
-            - type="number": Specifies that the input should accept numeric values.
-            - id="a": Assigns a unique identifier "a" to this input, allowing it to be accessed via JavaScript.
-            - placeholder="First number": Displays the text "First number" inside the input field as a hint to the user.
-        -->
-        
-        <input type="number" id="b" placeholder="Second number"><br>
-        <!--
-            <input> Element: Second Number Input
-            
-            - type="number": Specifies that the input should accept numeric values.
-            - id="b": Assigns a unique identifier "b" to this input, allowing it to be accessed via JavaScript.
-            - placeholder="Second number": Displays the text "Second number" inside the input field as a hint to the user.
-            
-            <br> Tag: Line Break
-            
-            Inserts a line break after the second input field, moving subsequent elements to the next line.
-        -->
-        
-        <button onclick="calculate('add')">Add</button>
-        <!--
-            <button> Element: Add Button
-            
-            - onclick="calculate('add')": Sets up an event handler that calls the JavaScript function "calculate"
-              with the argument 'add' when the button is clicked.
-            - "Add": The text displayed on the button.
-        -->
-        
-        <button onclick="calculate('subtract')">Subtract</button>
-        <!--
-            <button> Element: Subtract Button
-            
-            - onclick="calculate('subtract')": Sets up an event handler that calls the JavaScript function "calculate"
-              with the argument 'subtract' when the button is clicked.
-            - "Subtract": The text displayed on the button.
-        -->
-        
-        <button onclick="calculate('multiply')">Multiply</button>
-        <!--
-            <button> Element: Multiply Button
-            
-            - onclick="calculate('multiply')": Sets up an event handler that calls the JavaScript function "calculate"
-              with the argument 'multiply' when the button is clicked.
-            - "Multiply": The text displayed on the button.
-        -->
-        
-        <button onclick="calculate('divide')">Divide</button>
-        <!--
-            <button> Element: Divide Button
-            
-            - onclick="calculate('divide')": Sets up an event handler that calls the JavaScript function "calculate"
-              with the argument 'divide' when the button is clicked.
-            - "Divide": The text displayed on the button.
-        -->
-        
-        <div class="result" id="result"></div>
-        <!--
-            <div> Element: Result Display
-            
-            - class="result": Assigns the "result" class to this <div>, allowing it to be styled using CSS.
-            - id="result": Assigns a unique identifier "result" to this <div>, enabling it to be accessed and manipulated via JavaScript.
-            
-            This <div> is used to display the result of the arithmetic operation or any error messages.
-        -->
-    </div>
-    
+    <header>
+        <h1>Calculation Manager</h1>
+
+        <div class="header-actions">
+            <button class="light" type="button" onclick="goToLogin()">
+                Login
+            </button>
+
+            <button class="light" type="button" onclick="logout()">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2 id="form-title">Add Calculation</h2>
+
+            <form id="calculation-form">
+                <div class="form-grid">
+                    <div>
+                        <label for="a">First number</label>
+                        <input
+                            id="a"
+                            name="a"
+                            type="number"
+                            step="any"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="b">Second number</label>
+                        <input
+                            id="b"
+                            name="b"
+                            type="number"
+                            step="any"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="type">Operation</label>
+                        <select id="type" name="type" required>
+                            <option value="">Select an operation</option>
+                            <option value="Add">Add</option>
+                            <option value="Sub">Subtract</option>
+                            <option value="Multiply">Multiply</option>
+                            <option value="Divide">Divide</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button
+                        id="submit-button"
+                        class="primary"
+                        type="submit"
+                    >
+                        Add Calculation
+                    </button>
+
+                    <button
+                        id="cancel-edit-button"
+                        class="secondary"
+                        type="button"
+                        style="display: none;"
+                        onclick="cancelEdit()"
+                    >
+                        Cancel Edit
+                    </button>
+
+                    <button
+                        class="success"
+                        type="button"
+                        onclick="loadCalculations()"
+                    >
+                        Refresh List
+                    </button>
+                </div>
+            </form>
+
+            <div id="message" role="alert"></div>
+
+            <div id="details" class="details">
+                <h3>Calculation Details</h3>
+                <div id="details-content"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Saved Calculations</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Number</th>
+                            <th>Second Number</th>
+                            <th>Operation</th>
+                            <th>Result</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="calculation-table-body"></tbody>
+                </table>
+            </div>
+
+            <div id="empty-state" class="empty" style="display: none;">
+                No calculations have been saved yet.
+            </div>
+        </section>
+    </main>
+
     <script>
-        /*
-            <script> Section: JavaScript
-            
-            The <script> element allows you to embed JavaScript code directly within the HTML document.
-            JavaScript is a programming language that enables interactive and dynamic content on web pages.
-            In this example, JavaScript is used to handle calculator operations by sending requests to the server
-            and updating the page based on the server's response.
-        */
-        
-        async function calculate(operation) {
-            /*
-                Function: calculate
-                
-                The 'calculate' function performs an arithmetic operation by sending a POST request
-                to the corresponding API endpoint. It retrieves the input values, sends them to the server,
-                and updates the result display based on the server's response.
-                
-                Parameters:
-                - operation (string): The arithmetic operation to perform ('add', 'subtract', 'multiply', 'divide').
-                
-                Steps:
-                1. Retrieve the values from the input fields with IDs 'a' and 'b'.
-                2. Parse the retrieved values to floating-point numbers.
-                3. Send a POST request to the server at the endpoint corresponding to the operation.
-                4. Await the server's response and parse it as JSON.
-                5. Log the response status and data to the console for debugging purposes.
-                6. If the response is successful (status code 200), display the result.
-                7. If the response indicates an error, display the error message.
-                8. Handle any network or unexpected errors by displaying an error message.
-            */
-            
-            // Retrieve the value of the first input field (ID: 'a') and parse it as a float
-            const a = parseFloat(document.getElementById('a').value);
-            
-            // Retrieve the value of the second input field (ID: 'b') and parse it as a float
-            const b = parseFloat(document.getElementById('b').value);
-            
-            // Get the <div> element where the result or error message will be displayed
-            const resultElement = document.getElementById('result');
-    
+        const form = document.getElementById("calculation-form");
+        const message = document.getElementById("message");
+        const tableBody = document.getElementById("calculation-table-body");
+        const emptyState = document.getElementById("empty-state");
+        const detailsBox = document.getElementById("details");
+        const detailsContent = document.getElementById("details-content");
+        const formTitle = document.getElementById("form-title");
+        const submitButton = document.getElementById("submit-button");
+        const cancelEditButton = document.getElementById(
+            "cancel-edit-button"
+        );
+
+        let editingCalculationId = null;
+
+        function getToken() {
+            return localStorage.getItem("access_token");
+        }
+
+        function goToLogin() {
+            window.location.href = "/login-page";
+        }
+
+        function logout() {
+            localStorage.removeItem("access_token");
+            showMessage("You have been logged out.", "success");
+
+            setTimeout(() => {
+                window.location.href = "/login-page";
+            }, 500);
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className =
+                type === "success"
+                    ? "message-success"
+                    : "message-error";
+        }
+
+        function getErrorMessage(data, fallback) {
+            return data.error || data.detail || fallback;
+        }
+
+        function requireToken() {
+            const token = getToken();
+
+            if (!token) {
+                showMessage(
+                    "Please log in before managing calculations.",
+                    "error"
+                );
+                return null;
+            }
+
+            return token;
+        }
+
+        function getFormData() {
+            const aValue = document.getElementById("a").value;
+            const bValue = document.getElementById("b").value;
+            const typeValue = document.getElementById("type").value;
+
+            if (aValue === "" || bValue === "") {
+                throw new Error("Both number fields are required.");
+            }
+
+            const a = Number(aValue);
+            const b = Number(bValue);
+
+            if (!Number.isFinite(a) || !Number.isFinite(b)) {
+                throw new Error("Both operands must be valid numbers.");
+            }
+
+            if (!["Add", "Sub", "Multiply", "Divide"].includes(typeValue)) {
+                throw new Error("Please select a valid operation.");
+            }
+
+            if (typeValue === "Divide" && b === 0) {
+                throw new Error("Division by zero is not allowed.");
+            }
+
+            return {
+                a,
+                b,
+                type: typeValue
+            };
+        }
+
+        async function authenticatedFetch(url, options = {}) {
+            const token = requireToken();
+
+            if (!token) {
+                throw new Error("Authentication required.");
+            }
+
+            const headers = {
+                ...(options.headers || {}),
+                "Authorization": `Bearer ${token}`
+            };
+
+            if (options.body) {
+                headers["Content-Type"] = "application/json";
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem("access_token");
+                throw new Error(
+                    "Your session is invalid or expired. Please log in again."
+                );
+            }
+
+            return response;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
             try {
-                /*
-                    Sending the POST Request
-                    
-                    - fetch('/' + operation, {...}): Sends a POST request to the server at the path corresponding
-                      to the operation (e.g., '/add', '/subtract').
-                      
-                    - method: 'POST': Specifies the HTTP method as POST, indicating that data is being sent to the server.
-                    
-                    - headers: { 'Content-Type': 'application/json' }: Sets the 'Content-Type' header to 'application/json',
-                      informing the server that the request body contains JSON data.
-                      
-                    - body: JSON.stringify({ a: a, b: b }): Converts the JavaScript object { a: a, b: b } into a JSON string
-                      to be sent in the request body.
-                */
-                const response = await fetch('/' + operation, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ a: a, b: b })
+                const payload = getFormData();
+                const isEditing = editingCalculationId !== null;
+                const url = isEditing
+                    ? `/calculations/${editingCalculationId}`
+                    : "/calculations/";
+                const method = isEditing ? "PUT" : "POST";
+
+                submitButton.disabled = true;
+
+                const response = await authenticatedFetch(url, {
+                    method,
+                    body: JSON.stringify(payload)
                 });
-                
-                // Await and parse the response as JSON
+
                 const data = await response.json();
-                
-                // Log the response status and data to the browser's console for debugging
-                console.log('Response Status:', response.status);
-                console.log('Response Data:', data);
-                
-                if (response.ok) {
-                    /*
-                        Successful Response Handling
-                    
-                        - response.ok: A boolean indicating whether the HTTP status code is in the range 200-299,
-                          which means the request was successful.
-                          
-                        - resultElement.innerText: Updates the text inside the result <div> to display the result.
-                    */
-                    resultElement.innerText = 'Calculation Result: ' + data.result;
-                } else {
-                    /*
-                        Error Response Handling
-                    
-                        - If the response is not successful, it is expected to contain an 'error' field with
-                          a descriptive message.
-                          
-                        - resultElement.innerText: Updates the text inside the result <div> to display the error message.
-                    */
-                    resultElement.innerText = 'Error: ' + data.error;
+
+                if (!response.ok) {
+                    throw new Error(
+                        getErrorMessage(
+                            data,
+                            "Unable to save the calculation."
+                        )
+                    );
                 }
+
+                showMessage(
+                    isEditing
+                        ? "Calculation updated successfully."
+                        : "Calculation added successfully.",
+                    "success"
+                );
+
+                form.reset();
+                cancelEdit();
+                await loadCalculations();
             } catch (error) {
-                /*
-                    Catch Block: Handling Network or Unexpected Errors
-                
-                    - Any errors that occur during the fetch operation (e.g., network issues) are caught here.
-                    
-                    - console.error: Logs the error to the browser's console for debugging.
-                    
-                    - resultElement.innerText: Updates the text inside the result <div> to display the error message.
-                */
-                console.error('Fetch error:', error);
-                resultElement.innerText = 'Error: ' + error.message;
+                showMessage(error.message, "error");
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        async function loadCalculations() {
+            try {
+                const response = await authenticatedFetch("/calculations/");
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        getErrorMessage(
+                            data,
+                            "Unable to load calculations."
+                        )
+                    );
+                }
+
+                renderCalculations(data);
+            } catch (error) {
+                tableBody.innerHTML = "";
+                emptyState.style.display = "block";
+                showMessage(error.message, "error");
             }
         }
+
+        function renderCalculations(calculations) {
+            tableBody.innerHTML = "";
+
+            if (calculations.length === 0) {
+                emptyState.style.display = "block";
+                return;
+            }
+
+            emptyState.style.display = "none";
+
+            calculations.forEach((calculation) => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${calculation.id}</td>
+                    <td>${calculation.a}</td>
+                    <td>${calculation.b}</td>
+                    <td>${calculation.type}</td>
+                    <td>${calculation.result}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button
+                                class="primary"
+                                type="button"
+                                onclick="readCalculation(${calculation.id})"
+                            >
+                                View
+                            </button>
+
+                            <button
+                                class="secondary"
+                                type="button"
+                                onclick="startEdit(
+                                    ${calculation.id},
+                                    ${calculation.a},
+                                    ${calculation.b},
+                                    '${calculation.type}'
+                                )"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                class="danger"
+                                type="button"
+                                onclick="deleteCalculation(${calculation.id})"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function readCalculation(calculationId) {
+            try {
+                const response = await authenticatedFetch(
+                    `/calculations/${calculationId}`
+                );
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        getErrorMessage(
+                            data,
+                            "Unable to retrieve the calculation."
+                        )
+                    );
+                }
+
+                detailsContent.innerHTML = `
+                    <p><strong>ID:</strong> ${data.id}</p>
+                    <p><strong>First number:</strong> ${data.a}</p>
+                    <p><strong>Second number:</strong> ${data.b}</p>
+                    <p><strong>Operation:</strong> ${data.type}</p>
+                    <p><strong>Result:</strong> ${data.result}</p>
+                    <p><strong>Created:</strong> ${new Date(
+                        data.created_at
+                    ).toLocaleString()}</p>
+                `;
+
+                detailsBox.style.display = "block";
+                showMessage(
+                    "Calculation retrieved successfully.",
+                    "success"
+                );
+            } catch (error) {
+                detailsBox.style.display = "none";
+                showMessage(error.message, "error");
+            }
+        }
+
+        function startEdit(id, a, b, type) {
+            editingCalculationId = id;
+
+            document.getElementById("a").value = a;
+            document.getElementById("b").value = b;
+            document.getElementById("type").value = type;
+
+            formTitle.textContent = `Edit Calculation #${id}`;
+            submitButton.textContent = "Update Calculation";
+            cancelEditButton.style.display = "inline-block";
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        function cancelEdit() {
+            editingCalculationId = null;
+            formTitle.textContent = "Add Calculation";
+            submitButton.textContent = "Add Calculation";
+            cancelEditButton.style.display = "none";
+            form.reset();
+        }
+
+        async function deleteCalculation(calculationId) {
+            const confirmed = window.confirm(
+                `Delete calculation #${calculationId}?`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch(
+                    `/calculations/${calculationId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    let data = {};
+
+                    try {
+                        data = await response.json();
+                    } catch (error) {
+                        data = {};
+                    }
+
+                    throw new Error(
+                        getErrorMessage(
+                            data,
+                            "Unable to delete the calculation."
+                        )
+                    );
+                }
+
+                detailsBox.style.display = "none";
+                showMessage(
+                    "Calculation deleted successfully.",
+                    "success"
+                );
+
+                await loadCalculations();
+            } catch (error) {
+                showMessage(error.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (getToken()) {
+                loadCalculations();
+            } else {
+                showMessage(
+                    "Please log in to use the calculation manager.",
+                    "error"
+                );
+                emptyState.style.display = "block";
+            }
+        });
     </script>
 </body>
 </html>

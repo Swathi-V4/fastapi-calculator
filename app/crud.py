@@ -5,6 +5,10 @@ from app.security import hash_password
 from app.services.calculation_factory import CalculationFactory
 
 
+# -------------------------
+# User CRUD
+# -------------------------
+
 def get_user_by_username(
     db: Session,
     username: str,
@@ -50,10 +54,21 @@ def create_user(
     return db_user
 
 
-def get_calculations(db: Session):
+# -------------------------
+# Calculation CRUD
+# -------------------------
+
+def get_calculations(
+    db: Session,
+    user_id: int,
+):
+    """
+    Return all calculations owned by a specific user.
+    """
     return (
         db.query(models.Calculation)
-        .order_by(models.Calculation.id)
+        .filter(models.Calculation.user_id == user_id)
+        .order_by(models.Calculation.id.desc())
         .all()
     )
 
@@ -61,10 +76,17 @@ def get_calculations(db: Session):
 def get_calculation(
     db: Session,
     calculation_id: int,
+    user_id: int,
 ):
+    """
+    Return one calculation only when it belongs to the user.
+    """
     return (
         db.query(models.Calculation)
-        .filter(models.Calculation.id == calculation_id)
+        .filter(
+            models.Calculation.id == calculation_id,
+            models.Calculation.user_id == user_id,
+        )
         .first()
     )
 
@@ -72,7 +94,11 @@ def get_calculation(
 def create_calculation(
     db: Session,
     calculation: schemas.CalculationCreate,
+    user_id: int,
 ):
+    """
+    Create a calculation associated with a specific user.
+    """
     result = CalculationFactory.calculate(
         calculation.type,
         calculation.a,
@@ -84,6 +110,7 @@ def create_calculation(
         b=calculation.b,
         type=calculation.type.value,
         result=result,
+        user_id=user_id,
     )
 
     db.add(db_calculation)
@@ -97,10 +124,15 @@ def update_calculation(
     db: Session,
     calculation_id: int,
     calculation: schemas.CalculationUpdate,
+    user_id: int,
 ):
+    """
+    Update a calculation only when it belongs to the user.
+    """
     db_calculation = get_calculation(
         db,
         calculation_id,
+        user_id,
     )
 
     if db_calculation is None:
@@ -126,10 +158,15 @@ def update_calculation(
 def delete_calculation(
     db: Session,
     calculation_id: int,
+    user_id: int,
 ):
+    """
+    Delete a calculation only when it belongs to the user.
+    """
     db_calculation = get_calculation(
         db,
         calculation_id,
+        user_id,
     )
 
     if db_calculation is None:

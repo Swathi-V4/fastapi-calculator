@@ -1,14 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from app import crud, schemas
+from app import models, schemas
 from app.database import get_db
+from app.security import get_current_user
 
 
 router = APIRouter(
     prefix="/calculations",
     tags=["Calculations"],
 )
+
+
+def calculate_result(
+    a: float,
+    b: float,
+    calculation_type: schemas.CalculationType,
+) -> float:
+    """
+    Calculate the result based on the selected operation.
+    """
+    if calculation_type == schemas.CalculationType.ADD:
+        return a + b
+
+    if calculation_type == schemas.CalculationType.SUBTRACT:
+        return a - b
+
+    if calculation_type == schemas.CalculationType.MULTIPLY:
+        return a * b
+
+    if calculation_type == schemas.CalculationType.DIVIDE:
+        if b == 0:
+            raise ValueError("Division by zero is not allowed")
+
+        return a / b
+
+    raise ValueError("Invalid calculation type")
 
 
 @router.get(
@@ -18,11 +45,17 @@ router = APIRouter(
 )
 def browse_calculations(
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
-    Browse all saved calculations.
+    Return all calculations belonging to the logged-in user.
     """
-    return crud.get_calculations(db)
+    return (
+        db.query(models.Calculation)
+        .filter(models.Calculation.user_id == current_user.id)
+        .order_by(models.Calculation.id.desc())
+        .all()
+    )
 
 
 @router.get(
@@ -33,13 +66,18 @@ def browse_calculations(
 def read_calculation(
     calculation_id: int,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
-    Read one calculation by its ID.
+    Return one calculation belonging to the logged-in user.
     """
-    calculation = crud.get_calculation(
-        db,
-        calculation_id,
+    calculation = (
+        db.query(models.Calculation)
+        .filter(
+            models.Calculation.id == calculation_id,
+            models.Calculation.user_id == current_user.id,
+        )
+        .first()
     )
 
     if calculation is None:
@@ -57,23 +95,38 @@ def read_calculation(
     status_code=status.HTTP_201_CREATED,
 )
 def add_calculation(
-    calculation: schemas.CalculationCreate,
+    calculation_data: schemas.CalculationCreate,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
-    Add and save a new calculation.
+    Create and save a calculation for the logged-in user.
     """
     try:
-        return crud.create_calculation(
-            db,
-            calculation,
+        result = calculate_result(
+            calculation_data.a,
+            calculation_data.b,
+            calculation_data.type,
         )
-
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+
+    calculation = models.Calculation(
+        a=calculation_data.a,
+        b=calculation_data.b,
+        type=calculation_data.type.value,
+        result=result,
+        user_id=current_user.id,
+    )
+
+    db.add(calculation)
+    db.commit()
+    db.refresh(calculation)
+
+    return calculation
 
 
 @router.put(
@@ -83,57 +136,79 @@ def add_calculation(
 )
 def edit_calculation(
     calculation_id: int,
-    calculation: schemas.CalculationUpdate,
+    calculation_data: schemas.CalculationUpdate,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
-    Edit an existing calculation.
+    Update a calculation belonging to the logged-in user.
     """
-    try:
-        updated_calculation = crud.update_calculation(
-            db,
-            calculation_id,
-            calculation,
+    calculation = (
+        db.query(models.Calculation)
+        .filter(
+            models.Calculation.id == calculation_id,
+            models.Calculation.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if calculation is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Calculation not found",
         )
 
+    try:
+        result = calculate_result(
+            calculation_data.a,
+            calculation_data.b,
+            calculation_data.type,
+        )
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
 
-    if updated_calculation is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Calculation not found",
-        )
+    calculation.a = calculation_data.a
+    calculation.b = calculation_data.b
+    calculation.type = calculation_data.type.value
+    calculation.result = result
 
-    return updated_calculation
+    db.commit()
+    db.refresh(calculation)
+
+    return calculation
 
 
 @router.delete(
     "/{calculation_id}",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_calculation(
     calculation_id: int,
     db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
 ):
     """
-    Delete a calculation.
+    Delete a calculation belonging to the logged-in user.
     """
-    deleted_calculation = crud.delete_calculation(
-        db,
-        calculation_id,
+    calculation = (
+        db.query(models.Calculation)
+        .filter(
+            models.Calculation.id == calculation_id,
+            models.Calculation.user_id == current_user.id,
+        )
+        .first()
     )
 
-    if deleted_calculation is None:
+    if calculation is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Calculation not found",
         )
 
-    return {
-        "message": "Calculation deleted successfully",
-        "calculation_id": calculation_id,
-    }
+    db.delete(calculation)
+    db.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
