@@ -32,12 +32,18 @@ class DivideOperation(CalculationOperation):
         return a / b
 
 
+class PowerOperation(CalculationOperation):
+    def calculate(self, a: float, b: float) -> float:
+        return a ** b
+
+
 class CalculationFactory:
     _operations = {
         CalculationType.ADD: AddOperation,
         CalculationType.SUBTRACT: SubtractOperation,
         CalculationType.MULTIPLY: MultiplyOperation,
         CalculationType.DIVIDE: DivideOperation,
+        CalculationType.POWER: PowerOperation,
     }
 
     @classmethod

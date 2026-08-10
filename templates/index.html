@@ -252,6 +252,7 @@
                             <option value="Sub">Subtract</option>
                             <option value="Multiply">Multiply</option>
                             <option value="Divide">Divide</option>
+                            <option value="Power">Power (Exponentiation)</option>
                         </select>
                     </div>
                 </div>
@@ -393,7 +394,15 @@
                 throw new Error("Both operands must be valid numbers.");
             }
 
-            if (!["Add", "Sub", "Multiply", "Divide"].includes(typeValue)) {
+            if (
+                ![
+                    "Add",
+                    "Sub",
+                    "Multiply",
+                    "Divide",
+                    "Power"
+                ].includes(typeValue)
+            ) {
                 throw new Error("Please select a valid operation.");
             }
 
@@ -445,9 +454,11 @@
             try {
                 const payload = getFormData();
                 const isEditing = editingCalculationId !== null;
+
                 const url = isEditing
                     ? `/calculations/${editingCalculationId}`
                     : "/calculations/";
+
                 const method = isEditing ? "PUT" : "POST";
 
                 submitButton.disabled = true;
@@ -478,6 +489,7 @@
                 form.reset();
                 cancelEdit();
                 await loadCalculations();
+
             } catch (error) {
                 showMessage(error.message, "error");
             } finally {
@@ -487,7 +499,10 @@
 
         async function loadCalculations() {
             try {
-                const response = await authenticatedFetch("/calculations/");
+                const response = await authenticatedFetch(
+                    "/calculations/"
+                );
+
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -500,6 +515,7 @@
                 }
 
                 renderCalculations(data);
+
             } catch (error) {
                 tableBody.innerHTML = "";
                 emptyState.style.display = "block";
@@ -569,6 +585,7 @@
                 const response = await authenticatedFetch(
                     `/calculations/${calculationId}`
                 );
+
                 const data = await response.json();
 
                 if (!response.ok) {
@@ -586,16 +603,19 @@
                     <p><strong>Second number:</strong> ${data.b}</p>
                     <p><strong>Operation:</strong> ${data.type}</p>
                     <p><strong>Result:</strong> ${data.result}</p>
-                    <p><strong>Created:</strong> ${new Date(
-                        data.created_at
-                    ).toLocaleString()}</p>
+                    <p>
+                        <strong>Created:</strong>
+                        ${new Date(data.created_at).toLocaleString()}
+                    </p>
                 `;
 
                 detailsBox.style.display = "block";
+
                 showMessage(
                     "Calculation retrieved successfully.",
                     "success"
                 );
+
             } catch (error) {
                 detailsBox.style.display = "none";
                 showMessage(error.message, "error");
@@ -662,12 +682,14 @@
                 }
 
                 detailsBox.style.display = "none";
+
                 showMessage(
                     "Calculation deleted successfully.",
                     "success"
                 );
 
                 await loadCalculations();
+
             } catch (error) {
                 showMessage(error.message, "error");
             }
@@ -681,6 +703,7 @@
                     "Please log in to use the calculation manager.",
                     "error"
                 );
+
                 emptyState.style.display = "block";
             }
         });

@@ -35,6 +35,9 @@ def calculate_result(
 
         return a / b
 
+    if calculation_type == schemas.CalculationType.POWER:
+        return a ** b
+
     raise ValueError("Invalid calculation type")
 
 

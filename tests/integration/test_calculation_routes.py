@@ -120,6 +120,46 @@ def test_add_and_browse_calculation(registered_user):
     assert calculations[0]["id"] == created["id"]
 
 
+def test_power_calculation(registered_user):
+    """
+    Verify that a Power calculation is processed by the API,
+    stored in the database, and can be retrieved successfully.
+    """
+    create_response = client.post(
+        "/calculations/",
+        headers=registered_user["headers"],
+        json={
+            "a": 2,
+            "b": 5,
+            "type": "Power",
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    created = create_response.json()
+
+    assert created["a"] == 2
+    assert created["b"] == 5
+    assert created["type"] == "Power"
+    assert created["result"] == 32
+
+    calculation_id = created["id"]
+
+    read_response = client.get(
+        f"/calculations/{calculation_id}",
+        headers=registered_user["headers"],
+    )
+
+    assert read_response.status_code == 200
+
+    saved = read_response.json()
+
+    assert saved["id"] == calculation_id
+    assert saved["type"] == "Power"
+    assert saved["result"] == 32
+
+
 def test_read_calculation(registered_user):
     create_response = client.post(
         "/calculations/",

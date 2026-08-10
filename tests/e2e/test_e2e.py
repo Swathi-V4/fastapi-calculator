@@ -1,10 +1,15 @@
+import os
 from uuid import uuid4
 
 import pytest
 from playwright.sync_api import expect
 
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = os.getenv(
+    "BASE_URL",
+    "http://127.0.0.1:8000",
+)
+
 PASSWORD = "Password123!"
 
 
@@ -125,6 +130,62 @@ def test_register_login_and_bread(page, fastapi_server):
     ).to_have_count(0)
 
     expect(page.locator("#empty-state")).to_be_visible()
+
+
+@pytest.mark.e2e
+def test_power_calculation(page, fastapi_server):
+    """
+    Verify the new Power feature through the browser.
+    """
+    unique_value = uuid4().hex[:8]
+    username = f"poweruser_{unique_value}"
+    email = f"poweruser_{unique_value}@test.com"
+
+    # Register
+    page.goto(f"{BASE_URL}/register-page")
+
+    page.locator("#username").fill(username)
+    page.locator("#email").fill(email)
+    page.locator("#password").fill(PASSWORD)
+    page.locator("#confirm-password").fill(PASSWORD)
+
+    page.get_by_role("button", name="Register").click()
+
+    expect(page.locator("#message")).to_contain_text(
+        "Registration successful"
+    )
+
+    # Login
+    page.goto(f"{BASE_URL}/login-page")
+
+    page.locator("#email").fill(email)
+    page.locator("#password").fill(PASSWORD)
+
+    page.get_by_role("button", name="Login").click()
+
+    expect(page.locator("#message")).to_contain_text(
+        "Login successful"
+    )
+
+    page.wait_for_url(f"{BASE_URL}/")
+
+    # Power: 2 ^ 5 = 32
+    page.locator("#a").fill("2")
+    page.locator("#b").fill("5")
+    page.locator("#type").select_option("Power")
+
+    page.locator("#submit-button").click()
+
+    expect(page.locator("#message")).to_contain_text(
+        "Calculation added successfully"
+    )
+
+    calculation_row = page.locator(
+        "#calculation-table-body tr"
+    ).first
+
+    expect(calculation_row).to_contain_text("Power")
+    expect(calculation_row).to_contain_text("32")
 
 
 @pytest.mark.e2e

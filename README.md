@@ -1,6 +1,6 @@
 # FastAPI Calculator
 
-A full-stack FastAPI calculator application that supports secure user authentication and complete BREAD (Browse, Read, Edit, Add, Delete) operations for user calculations. The application uses PostgreSQL for data storage, SQLAlchemy as the ORM, JWT authentication for security, Docker for containerization, Playwright for end-to-end testing, and GitHub Actions for continuous integration.
+A full-stack FastAPI calculator application that supports secure user authentication and complete BREAD (Browse, Read, Edit, Add, Delete) operations for user calculations. The application uses PostgreSQL for data storage, SQLAlchemy as the ORM, JWT authentication for security, Docker for containerization, Playwright for end-to-end testing, and GitHub Actions for continuous integration and deployment.
 
 ---
 
@@ -10,9 +10,12 @@ A full-stack FastAPI calculator application that supports secure user authentica
 - Password hashing using bcrypt
 - PostgreSQL database with SQLAlchemy ORM
 - Complete BREAD operations for calculations
+- Addition, subtraction, multiplication, division, and power calculations
 - User-specific calculation history
-- Client-side validation
-- Integration testing with pytest
+- User authorization and ownership protection
+- Client-side and server-side validation
+- Division-by-zero validation
+- Unit and integration testing with pytest
 - End-to-end testing with Playwright
 - Dockerized application
 - GitHub Actions CI/CD workflow
@@ -38,7 +41,7 @@ A full-stack FastAPI calculator application that supports secure user authentica
 
 ## Project Structure
 
-```
+```text
 fastapi-calculator/
 │
 ├── app/
@@ -68,26 +71,28 @@ fastapi-calculator/
 
 # Running the Application
 
-## Clone the repository
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Swathi-V4/fastapi-calculator.git
 cd fastapi-calculator
 ```
 
-## Build and start the application
+## 2. Build and Start the Application
+
+Make sure Docker Desktop is running, then execute:
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-The application will be available at:
+The FastAPI application will be available at:
 
-```
+```text
 http://localhost:8000
 ```
 
-## Stop the application
+## 3. Stop the Application
 
 ```bash
 docker compose down
@@ -95,25 +100,29 @@ docker compose down
 
 ---
 
-# Running Tests
+# Running Tests Locally
 
-## Run all tests
-
-```bash
-pytest
-```
-
-## Run integration tests
+Make sure Docker Desktop is running and start the application first:
 
 ```bash
-pytest tests/integration -v
+docker compose up -d
 ```
 
-## Run Playwright end-to-end tests
+## Run Unit and Integration Tests
 
 ```bash
-pytest tests/e2e -v
+docker compose run --rm web pytest tests/unit tests/integration -v
 ```
+
+These tests verify the application logic, schemas, authentication, database integration, calculation operations, and BREAD API routes.
+
+## Run Playwright End-to-End Tests
+
+```bash
+docker compose run --rm -e BASE_URL=http://web:8000 web pytest tests/e2e -v
+```
+
+The Playwright tests verify the application through the browser, including registration, login, calculation operations, invalid login handling, power calculations, and division-by-zero validation.
 
 ---
 
@@ -122,17 +131,17 @@ pytest tests/e2e -v
 ## Authentication
 
 | Method | Endpoint | Description |
-|---------|----------|-------------|
+| ------ | -------- | ----------- |
 | POST | `/register` | Register a new user |
 | POST | `/login` | Login and receive a JWT token |
 
 ## Calculations
 
 | Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/calculations` | Browse all calculations for the logged-in user |
+| ------ | -------- | ----------- |
+| GET | `/calculations/` | Browse calculations for the logged-in user |
 | GET | `/calculations/{id}` | Read a specific calculation |
-| POST | `/calculations` | Add a new calculation |
+| POST | `/calculations/` | Add a new calculation |
 | PUT | `/calculations/{id}` | Edit an existing calculation |
 | DELETE | `/calculations/{id}` | Delete a calculation |
 
@@ -146,42 +155,41 @@ The project includes:
 - Integration tests
 - Playwright end-to-end tests
 
-The tests verify:
+The automated tests verify:
 
-- User registration
-- User login
+- User registration and login
 - JWT authentication
+- Password hashing
 - Calculation BREAD operations
+- Addition, subtraction, multiplication, division, and power operations
 - Database persistence
 - Input validation
 - Division-by-zero handling
+- Invalid operation handling
 - User authorization and ownership protection
+
+The completed unit and integration test suite contains 60 passing tests. The Playwright E2E suite contains 4 passing tests.
 
 ---
 
-# Continuous Integration
+# Continuous Integration and Deployment
 
-GitHub Actions automatically:
+GitHub Actions is used to automate the CI/CD workflow. The pipeline:
 
 - Installs project dependencies
 - Starts PostgreSQL
-- Runs unit and integration tests
-- Runs Playwright end-to-end tests
+- Runs automated tests
+- Supports Playwright end-to-end testing
 - Builds the Docker image
+- Pushes the application image to Docker Hub
 
 ---
 
 # Docker Hub
 
-Docker image:
+The Docker image for this project is available at:
 
 https://hub.docker.com/r/swathi638/fastapi-calculator
-
----
-
-# Reflection
-
-This project expanded a simple calculator into a secure full-stack web application by implementing JWT authentication, PostgreSQL persistence, and complete BREAD functionality for user calculations. Integration tests and Playwright end-to-end tests helped verify both backend APIs and user interactions, while Docker and GitHub Actions provided a consistent development and deployment workflow. Troubleshooting issues involving authentication, database connectivity, and Playwright browser configuration strengthened my understanding of full-stack development, automated testing, containerization, and continuous integration.
 
 ---
 

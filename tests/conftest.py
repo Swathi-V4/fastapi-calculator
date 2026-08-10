@@ -1,16 +1,23 @@
+import os
 import time
 
 import pytest
 import requests
 
 
+BASE_URL = os.getenv(
+    "BASE_URL",
+    "http://127.0.0.1:8000",
+)
+
+
 @pytest.fixture(scope="session")
 def fastapi_server():
     """
-    Confirm that the Docker-based FastAPI server is available
+    Confirm that the FastAPI server is available
     before running the E2E tests.
     """
-    server_url = "http://127.0.0.1:8000/"
+    server_url = f"{BASE_URL}/"
     timeout = 30
     start_time = time.time()
 
@@ -31,7 +38,6 @@ def fastapi_server():
         time.sleep(1)
 
     pytest.fail(
-        "FastAPI server is not available at "
-        "http://127.0.0.1:8000. "
-        "Run 'docker compose up -d' first."
+        f"FastAPI server is not available at {BASE_URL}. "
+        "Make sure the application is running first."
     )

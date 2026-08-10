@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from app.models import Calculation, User
 from app.schemas import CalculationCreate
 from app.security import hash_password
@@ -5,9 +7,11 @@ from app.services.calculation_factory import CalculationFactory
 
 
 def test_insert_calculation_record(db_session):
+    unique_value = uuid4().hex[:8]
+
     user = User(
-        username="integrationuser",
-        email="integrationuser@test.com",
+        username=f"integrationuser_{unique_value}",
+        email=f"integrationuser_{unique_value}@test.com",
         password_hash=hash_password("Password123!"),
     )
 

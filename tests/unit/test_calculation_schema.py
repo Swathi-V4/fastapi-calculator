@@ -16,13 +16,14 @@ def test_calculation_create_accepts_valid_input():
     assert calculation.type == CalculationType.ADD
 
 
-def test_calculation_create_rejects_invalid_type():
-    with pytest.raises(ValidationError):
-        CalculationCreate(
-            a=10,
-            b=5,
-            type="Power",
-        )
+def test_calculation_create_accepts_power():
+    calculation = CalculationCreate(
+        a=2,
+        b=3,
+        type="Power",
+    )
+
+    assert calculation.type == CalculationType.POWER
 
 
 def test_calculation_create_rejects_zero_division():

@@ -11,6 +11,7 @@ from app.services.calculation_factory import CalculationFactory
         (CalculationType.SUBTRACT, 10, 5, 5),
         (CalculationType.MULTIPLY, 10, 5, 50),
         (CalculationType.DIVIDE, 10, 5, 2),
+        (CalculationType.POWER, 2, 3, 8),
     ],
 )
 def test_factory_calculates_correct_result(
@@ -45,4 +46,4 @@ def test_factory_rejects_invalid_operation():
         ValueError,
         match="Unsupported calculation type",
     ):
-        CalculationFactory.create("Power")
+        CalculationFactory.create("InvalidOperation")
