@@ -192,6 +192,14 @@ The Docker image for this project is available at:
 https://hub.docker.com/r/swathi638/fastapi-calculator
 
 ---
+# Reflection
+
+This final project strengthened my understanding of how different parts of a full-stack application work together. I expanded the calculator by adding exponentiation as a new calculation type and integrated it throughout the backend, front end, validation, and testing. One of the most important parts of this project was making sure the new feature worked without breaking the existing BREAD operations or authentication system.
+
+Testing was especially helpful because unit, integration, and Playwright end-to-end tests verified the application at different levels. I also gained more experience troubleshooting Docker and Playwright issues, particularly when the E2E tests initially could not connect to the FastAPI server. After resolving these issues, all of the tests passed successfully.
+
+Finally, using GitHub Actions and Docker Hub helped me understand how automated testing and deployment fit into a professional development workflow. Overall, this project improved my confidence with FastAPI, SQLAlchemy, Pydantic, Docker, automated testing, and CI/CD.
+---
 
 # Author
 
